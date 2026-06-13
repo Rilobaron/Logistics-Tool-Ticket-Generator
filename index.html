@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Logistics Ticket Generator • Gerador de Tickets</title>
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" href="./css/styles.css" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232563eb'/%3E%3Cpath d='M13 22a4 4 0 0 1 4-4h30a4 4 0 0 1 4 4v4a5 5 0 0 0 0 10v5a4 4 0 0 1-4 4H17a4 4 0 0 1-4-4v-5a5 5 0 0 0 0-10v-4Z' fill='%23fff'/%3E%3Cpath d='M27 18v27' stroke='%232563eb' stroke-width='3' stroke-dasharray='4 5'/%3E%3C/svg%3E" />
+  <script>
+    window.APP_CONFIG = {
+      appName: 'Gerador de Tickets Logísticos',
+      brandName: 'Logistics Tools',
+      brandMark: 'LT',
+      transportadoraPadrao: 'Transportadora',
+      storagePrefix: 'logisticsTicketGeneratorV3',
+      clientIntroTemplate: 'Sou da equipe responsável pelo atendimento logístico da entrega.',
+      footerText: 'Projeto genérico para geração de mensagens logísticas · histórico temporário apenas durante a sessão · Status/Ação na planilha.',
+      driverTitle: 'Ticket logístico',
+      orderLabel: 'Pedido/Ticket'
+    };
+  </script>
+</head>
+<body class="theme-generic">
+  <div class="mobile-topbar">
+    <button class="menu-toggle" type="button" onclick="toggleSidebar(true)" aria-label="Abrir menu">☰</button>
+    <div class="mobile-brand"><span class="brand-mark js-brand-mark">LT</span><span class="js-app-name">Gerador de Tickets Logísticos</span></div>
+    <span class="js-sheet-badge badge-pro badge-warn"><span class="badge-dot"></span>Planilha não conectada</span>
+  </div>
+  <div id="backdrop" class="backdrop" onclick="toggleSidebar(false)"></div>
+
+  <div class="app-shell">
+    <aside id="sidebar" class="sidebar" aria-label="Menu principal">
+      <div class="sidebar-inner">
+        <div class="brand">
+          <div class="brand-mark js-brand-mark">LT</div>
+          <div class="brand-copy">
+            <strong class="js-brand-name">Logistics Tools</strong>
+            <span class="js-app-name">Gerador de Tickets Logísticos</span>
+          </div>
+        </div>
+
+        <div class="integration-panel">
+          <small>Status da integração</small>
+          <span class="js-sheet-badge badge-pro badge-warn"><span class="badge-dot"></span>Planilha não conectada</span>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-btn active" type="button" data-view="gerador" onclick="showView('gerador')"><span class="nav-indicator"></span>Gerador</button>
+          <button class="nav-btn" type="button" data-view="historico" onclick="showView('historico')"><span class="nav-indicator"></span>Mensagens geradas <span class="nav-count js-history-count">0</span></button>
+          <button class="nav-btn" type="button" data-view="configuracoes" onclick="showView('configuracoes')"><span class="nav-indicator"></span>Configurações</button>
+          <button class="nav-btn" type="button" data-view="planilha" onclick="showView('planilha')"><span class="nav-indicator"></span>Planilha</button>
+        </nav>
+
+        <div class="sidebar-footer js-footer-text">Projeto genérico de tickets logísticos.</div>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <div class="content-wrap">
+        <section id="view-gerador" class="view active">
+          <div class="page-header">
+            <div class="page-title">
+              <h1>Gerador de mensagens</h1>
+              <p>Cole os dados do sistema, revise as informações principais e gere as mensagens de atendimento logístico para entregador e cliente.</p>
+            </div>
+            <div class="header-actions">
+              <span class="js-sheet-badge badge-pro badge-warn"><span class="badge-dot"></span>Planilha não conectada</span>
+            </div>
+          </div>
+
+          <div class="layout-two">
+            <div class="column-left">
+              <div class="card-panel">
+                <div class="card-head">
+                  <div class="card-title"><span class="title-accent"></span><div><h2>Dados do ticket</h2><small>Cole o bloco copiado do sistema logístico.</small></div></div>
+                  <button class="btn-pro btn-primary-pro btn-sm-pro" type="button" onclick="extractData(true)">Extrair dados</button>
+                </div>
+                <div class="card-body">
+                  <label for="dados">Texto copiado do sistema</label>
+                  <textarea id="dados" placeholder="Cole aqui o bloco do sistema logístico. Exemplo:\n\nNome\n:\nNome do Cliente\nTelefone\n:\n(11) 99999-9999\nEndereço\n:\nRua Exemplo, 123 - Centro\nCEP\n:\n13320460\nCPF/CNPJ\n:\n123.456.789-00\nE-mail\n:\ncliente@email.com"></textarea>
+                  <div class="hint">O gerador identifica nome, telefone, endereço e pedido quando disponíveis. CPF, CEP e e-mail não são salvos.</div>
+                </div>
+              </div>
+
+              <div class="card-panel">
+                <div class="card-head">
+                  <div class="card-title"><span class="title-accent"></span><div><h2>Revisar e completar</h2><small>Confira os campos antes de gerar e escolha o tipo da reclamação.</small></div></div>
+                </div>
+                <div class="card-body">
+                  <div class="form-grid">
+                    <div class="field"><label for="pedido">Pedido / Ticket <span class="required">*</span></label><input id="pedido" type="text" placeholder="Ex.: 1234567890" /></div>
+                    <div class="field"><label for="nome">Nome do cliente <span class="required">*</span></label><input id="nome" type="text" placeholder="Preenchido automaticamente" /></div>
+                    <div class="field"><label for="telefone">Telefone <span class="required">*</span></label><input id="telefone" type="text" placeholder="Ex.: 11973316385" /></div>
+                    <div class="field"><label for="dataEntrega">Data da entrega</label><input id="dataEntrega" type="date" /></div>
+                    <div class="field"><label for="valor">Valor da mercadoria</label><input id="valor" type="text" placeholder="Ex.: 53.97" /></div>
+                    <div class="field"><label for="transportadora">Transportadora</label><input id="transportadora" type="text" value="Transportadora" /></div>
+                    <div class="field"><label for="statusAcao">Status/Ação do ticket</label><select id="statusAcao"><option value="Enviada">Enviada</option><option value="Aguardando resposta do cliente">Aguardando resposta do cliente</option><option value="Ticket Fechado">Ticket Fechado</option></select><div class="hint">Esse status será salvo na aba Tickets da planilha.</div></div><div class="field"><label for="periodoSaudacao">Saudação da mensagem</label><select id="periodoSaudacao"><option value="Bom dia">Bom dia</option><option value="Boa tarde">Boa tarde</option><option value="Boa noite">Boa noite</option></select><div class="hint">Usada no início da mensagem para o cliente.</div></div>
+                    <div class="field"><label for="saudacao">Nome para saudação</label><input id="saudacao" type="text" placeholder="Ex.: Maria" /></div>
+                    <div class="field full"><label for="endereco">Endereço do destinatário</label><input id="endereco" type="text" placeholder="Preenchido automaticamente" /><div class="hint">Usado apenas na mensagem para o entregador.</div></div>
+                  </div>
+
+                  <div class="divider"></div>
+                  <label>Tipo de reclamação <span class="required">*</span></label>
+                  <div class="complaint-list" id="tipoReclamacaoGrid"></div>
+
+                  <div class="divider"></div>
+                  <label class="checkline" for="autoSalvar"><input id="autoSalvar" type="checkbox" checked />Enviar para a planilha automaticamente ao gerar</label>
+                  <div class="hint">Sem planilha configurada, o gerador segue funcionando e mantém as mensagens no histórico temporário.</div>
+
+                  <div class="actions" style="margin-top:16px">
+                    <button id="btnGerar" class="btn-pro btn-primary-pro btn-wide" type="button" onclick="generateMainFlow()">Gerar mensagens</button>
+                    <button id="btnSalvar" class="btn-pro btn-success-pro" type="button" onclick="saveToSheetManual()">Enviar para planilha</button>
+                    <button class="btn-pro btn-light-pro" type="button" onclick="copyAll()">Copiar tudo</button>
+                    <button class="btn-pro btn-danger-pro" type="button" onclick="clearForm()">Limpar campos</button>
+                  </div>
+                </div>
+              </div>
+
+              <div class="cards-row">
+                <div id="statusMensagem" class="status-card warn"><div class="status-mark">M</div><div><strong>Mensagens</strong><span>Aguardando geração.</span></div></div>
+                <div id="statusPlanilha" class="status-card warn"><div class="status-mark">P</div><div><strong>Planilha</strong><span>Aguardando conexão ou envio.</span></div></div>
+              </div>
+            </div>
+
+            <div class="column-right">
+              <div class="card-panel">
+                <div class="card-head">
+                  <div class="card-title"><span class="title-accent"></span><div><h2>Mensagem para o entregador</h2><small>Dados para contato com o entregador.</small></div></div>
+                  <button class="btn-pro btn-light-pro btn-sm-pro" type="button" onclick="copyField('msgMotorista', 'Mensagem do entregador copiada.')">Copiar</button>
+                </div>
+                <div class="card-body"><textarea id="msgMotorista" class="output-area" readonly placeholder="A mensagem aparecerá aqui após gerar."></textarea></div>
+              </div>
+
+              <div class="card-panel">
+                <div class="card-head">
+                  <div class="card-title"><span class="title-accent"></span><div><h2>Mensagem para o cliente</h2><small>Texto com saudação e opções de retorno.</small></div></div>
+                  <button class="btn-pro btn-light-pro btn-sm-pro" type="button" onclick="copyField('msgCliente', 'Mensagem do cliente copiada.')">Copiar</button>
+                </div>
+                <div class="card-body"><textarea id="msgCliente" class="output-area" readonly placeholder="A mensagem aparecerá aqui após gerar."></textarea></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-historico" class="view">
+          <div class="page-header">
+            <div class="page-title"><h1>Mensagens geradas</h1><p>Histórico temporário da sessão atual. Ele pode permanecer ao recarregar a página, mas não é salvo permanentemente.</p></div>
+            <div class="header-actions"><button class="btn-pro btn-danger-pro" type="button" onclick="clearTemporaryHistory()">Limpar histórico</button></div>
+          </div>
+          <div id="historyList" class="history-list"></div>
+        </section>
+
+        <section id="view-configuracoes" class="view">
+          <div class="page-header"><div class="page-title"><h1>Configurações</h1><p>Apenas preferências ficam salvas no navegador. Dados sensíveis dos tickets não são armazenados permanentemente.</p></div></div>
+          <div class="layout-two">
+            <div class="column-left">
+              <div class="card-panel">
+                <div class="card-head"><div class="card-title"><span class="title-accent"></span><div><h2>Conexão com Google Sheets</h2><small>A URL fica mascarada como uma chave de API.</small></div></div><span class="js-sheet-badge badge-pro badge-warn"><span class="badge-dot"></span>Planilha não conectada</span></div>
+                <div class="card-body">
+                  <div id="urlSavedBox" style="display:none">
+                    <label>URL salva</label>
+                    <div class="masked-row"><div id="maskedUrl" class="masked-url"></div><button id="btnToggleUrl" class="btn-pro btn-light-pro btn-sm-pro" type="button" onclick="toggleShowUrl()">Mostrar</button><button class="btn-pro btn-light-pro btn-sm-pro" type="button" onclick="editConnection()">Editar</button><button class="btn-pro btn-danger-pro btn-sm-pro" type="button" onclick="removeConnection()">Remover</button></div>
+                    <div class="hint">A URL fica salva no localStorage deste navegador. Os tickets ficam apenas em sessionStorage.</div>
+                  </div>
+                  <div id="urlEditBox">
+                    <label for="webAppUrl">URL do Web App do Google Apps Script</label>
+                    <input id="webAppUrl" type="text" placeholder="https://script.google.com/macros/s/...../exec" autocomplete="off" spellcheck="false" />
+                    <div class="actions" style="margin-top:10px"><button class="btn-pro btn-primary-pro" type="button" onclick="saveConnection()">Salvar conexão</button><button class="btn-pro btn-light-pro" type="button" onclick="cancelConnectionEdit()">Cancelar</button></div>
+                    <div class="hint">Use a URL terminada em <strong>/exec</strong>.</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="column-right">
+              <div class="card-panel">
+                <div class="card-head"><div class="card-title"><span class="title-accent"></span><div><h2>Preferências operacionais</h2><small>Configurações gerais do fluxo.</small></div></div></div>
+                <div class="card-body fieldset">
+                  <label class="checkline" for="autoSalvarConfig"><input id="autoSalvarConfig" type="checkbox" checked />Auto-salvar na planilha ao gerar</label>
+                  <div class="hint">A saudação fica na tela do Gerador para ser escolhida a cada ticket.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="view-planilha" class="view">
+          <div class="page-header"><div class="page-title"><h1>Planilha</h1><p>Status da integração e instruções rápidas para atualização do Apps Script.</p></div><button class="btn-pro btn-primary-pro" type="button" onclick="showView('configuracoes')">Configurar conexão</button></div>
+          <div class="cards-row">
+            <div id="sheetStatusBig" class="status-card warn"><div class="status-mark">P</div><div><strong>Planilha não conectada</strong><span>Adicione a URL /exec em Configurações.</span></div></div>
+            <div class="status-card info"><div class="status-mark">H</div><div><strong>Histórico temporário</strong><span><span class="js-history-count">0</span> ticket(s) gerados nesta sessão.</span></div></div>
+            <div class="status-card ok"><div class="status-mark">S</div><div><strong>Dados locais</strong><span>Tickets ficam apenas na sessão atual. A URL fica mascarada.</span></div></div>
+          </div>
+          <div class="card-panel" style="margin-top:18px">
+            <div class="card-head"><div class="card-title"><span class="title-accent"></span><div><h2>Como atualizar o Apps Script</h2><small>Use quando substituir o código da planilha.</small></div></div></div>
+            <div class="card-body">
+              <table class="table-card"><tr><th>Passo</th><th>O que fazer</th></tr><tr><td>1</td><td>Abra a planilha no Google Sheets e vá em <strong>Extensões &gt; Apps Script</strong>.</td></tr><tr><td>2</td><td>Substitua o conteúdo pelo arquivo Apps Script atualizado.</td></tr><tr><td>3</td><td>Vá em <strong>Implantar &gt; Gerenciar implantações</strong> e crie uma nova versão.</td></tr><tr><td>4</td><td>Copie a URL do App da Web terminada em <strong>/exec</strong> e salve em Configurações.</td></tr></table>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <div id="toast" class="toast-pro" role="status" aria-live="polite"></div>
+  <script src="./js/app.js"></script>
+</body>
+</html>
