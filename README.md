@@ -38,25 +38,25 @@ O projeto foi criado para automatizar processos operacionais de atendimento log�
 
 ### Configurações
 
-![Configurações](images/Configurações.png)
+![Configurações](image/Configurações.png)
 
 ---
 
 ### Instruções de Integração
 
-![Instruções](images/Instruções.png)
+![Instruções](image/Instruções.png)
 
 ---
 
 ### Dashboard da Planilha
 
-![Resumo](images/Resumo%20planilha.png)
+![Resumo](image/Resumo%20planilha.png)
 
 ---
 
 ### Controle de Tickets
 
-![Tickets](images/Tickets%20planilha.png)
+![Tickets](image/Tickets%20planilha.png)
 
 ---
 
